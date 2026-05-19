@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <cstdint>
-#include <string>
 #include <tuple>
 #include <vector>
 
@@ -14,8 +14,8 @@
 namespace nikolaev_d_block_linear_image_filtering {
 
 class NikolaevDBlockLinearImageFilteringPerfTests : public ppc::util::BaseRunPerfTests<InType, OutType> {
-  const int kWidth_ = 1920;
-  const int kHeight_ = 1080;
+  const int kWidth_ = 7680;
+  const int kHeight_ = 4320;
   InType input_data_;
 
   void SetUp() override {
