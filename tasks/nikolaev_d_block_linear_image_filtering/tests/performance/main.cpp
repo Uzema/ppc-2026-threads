@@ -1,0 +1,56 @@
+#include <gtest/gtest.h>
+
+#include <cstdint>
+#include <string>
+#include <tuple>
+#include <vector>
+
+#include "nikolaev_d_block_linear_image_filtering/common/include/common.hpp"
+#include "nikolaev_d_block_linear_image_filtering/omp/include/ops_omp.hpp"
+#include "nikolaev_d_block_linear_image_filtering/seq/include/ops_seq.hpp"
+// #include "nikolaev_d_block_linear_image_filtering/stl/include/ops_stl.hpp"
+#include "util/include/perf_test_util.hpp"
+
+namespace nikolaev_d_block_linear_image_filtering {
+
+class NikolaevDBlockLinearImageFilteringPerfTests : public ppc::util::BaseRunPerfTests<InType, OutType> {
+  const int kWidth_ = 1920;
+  const int kHeight_ = 1080;
+  InType input_data_;
+
+  void SetUp() override {
+    std::vector<uint8_t> in_data(static_cast<size_t>(kWidth_ * kHeight_ * 3), 128);
+    input_data_ = std::make_tuple(kWidth_, kHeight_, in_data);
+  }
+
+  bool CheckTestOutputData(OutType &output_data) final {
+    return std::get<2>(input_data_).size() == output_data.size();
+  }
+
+  InType GetTestInputData() final {
+    return input_data_;
+  }
+};
+
+TEST_P(NikolaevDBlockLinearImageFilteringPerfTests, RunPerfModes) {
+  ExecuteTest(GetParam());
+}
+
+namespace {
+
+// const auto kAllPerfTasks =
+//     ppc::util::MakeAllPerfTasks<InType, NikolaevDBlockLinearImageFilteringOMP, NikolaevDBlockLinearImageFilteringSEQ,
+//                                 NikolaevDBlockLinearImageFilteringSTL>(PPC_SETTINGS_nikolaev_d_block_linear_image_filtering);
+const auto kAllPerfTasks =
+    ppc::util::MakeAllPerfTasks<InType, NikolaevDBlockLinearImageFilteringSEQ, NikolaevDBlockLinearImageFilteringOMP>(
+        PPC_SETTINGS_nikolaev_d_block_linear_image_filtering);
+
+const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
+
+const auto kPerfTestName = NikolaevDBlockLinearImageFilteringPerfTests::CustomPerfTestName;
+
+INSTANTIATE_TEST_SUITE_P(RunModeTests, NikolaevDBlockLinearImageFilteringPerfTests, kGtestValues, kPerfTestName);
+
+}  // namespace
+
+}  // namespace nikolaev_d_block_linear_image_filtering
